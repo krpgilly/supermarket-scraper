@@ -44,10 +44,10 @@ def normalize_unit_price(unit_price_str):
 
         if "/100g" in price:
             price = float(price.replace("/100g", "").strip())
-            return price
+            return round(price, 3)
         elif "/kg" in price:
-                price = float(price.replace("/kg", "").strip()) /10
-                return price
+                price = float(price.replace("/kg", "").strip()) / 10
+                return round(price, 3)
         else:
             print(f"Unknown unit price format: {unit_price_str}")
             return None

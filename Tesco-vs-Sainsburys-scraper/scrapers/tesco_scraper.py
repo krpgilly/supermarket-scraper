@@ -8,7 +8,7 @@ from database.normalize import normalize_unit_price
 
 
 def scrape_tesco():
-    url = "https://www.tesco.com/shop/en-GB/products/299914515"
+    url = "https://www.tesco.com/shop/en-GB/products/309188955"
 
     options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -16,15 +16,12 @@ def scrape_tesco():
 
     price_selectors = [
         (By.CSS_SELECTOR, "p[class*='priceText']"),
-        (By.CSS_SELECTOR, ".price-per-item"),
-        (By.CSS_SELECTOR, "span[data-testid='value']"),
-        (By.XPATH, "//span[contains(@class, 'actual-price')]")
+        (By.CSS_SELECTOR, "p[class*='product-tile-price']"),
     ]
 
     unit_price_selectors = [
-        (By.CLASS_NAME, "online-components-product-tile-unit-price__subtext"),
-        (By.CSS_SELECTOR, "p.online-components-product-tile-unit-price__subtext"),
-        (By.XPATH, "//p[contains(@class, 'online-components-product-tile-unit-price__subtext')]"),
+        (By.CSS_SELECTOR, "p[class*='unitPriceText']"),
+        (By.CSS_SELECTOR, "p[class*='product-tile-unit-price']"),
    ]
 
     try:
