@@ -6,11 +6,11 @@ This keeps the comparison focused on actual value rather than marketing pack siz
 
 ## What This Does
 
-The project scrapes product data from Tesco and Sainsburys, extracts the raw price and item weight, and normalizes the result into one metric: price per 100g.
+The project scrapes a fixed Brie product page from Tesco and Sainsburys. It saves the displayed item price and unit price, then normalizes the unit price into one metric: price per 100g. The current scraper does not extract the product weight separately.
 
 That makes it easier to see which supermarket is offering better value for the same product, even when the packaging is different.
 
-The app also stores the results in a local SQLite database so both the raw scraped values and the normalized values are saved. This makes it easy to review the source data and the calculated value side by side.
+The app also stores the results in a local SQLite database so the raw item price, raw unit price, and normalized price per 100g are saved. This makes it easy to review the source data and the calculated value side by side.
 
 ---
 
@@ -18,15 +18,15 @@ The app also stores the results in a local SQLite database so both the raw scrap
 
 The main workflow is working through `main.py`.
 
-When you run it, the app:
+When you run it, the app attempts to:
 
-- creates or updates the database tables
-- pulls data from the Tesco scraper
-- pulls data from the Sainsburys scraper
-- stores each result in SQLite
-- saves the raw price, unit price, normalized price, and timestamp
+- create or update the database tables
+- pull data from the Tesco scraper
+- pull data from the Sainsburys scraper
+- store each result in SQLite
+- save the raw price, unit price, normalized price, and timestamp
 
-This means the app is a working pipeline that collects supermarket data and stores it in a structured way.
+The scraper uses fixed product URLs and Selenium with Chrome. Successful scraping depends on the pages being reachable and their markup matching the configured selectors.
 
 ---
 
@@ -39,24 +39,27 @@ Web scraping is fragile. A tiny change in a website layout can break a selector.
 ```python
 price_selectors = [
     (By.CSS_SELECTOR, "p[class*='priceText']"),
-    (By.CSS_SELECTOR, ".price-per-item"),
-    (By.XPATH, "//span[contains(@class, 'actual-price')]")
+    (By.CSS_SELECTOR, "p[class*='product-tile-price']"),
+]
+
+unit_price_selectors = [
+    (By.CSS_SELECTOR, "p[class*='unitPriceText']"),
+    (By.CSS_SELECTOR, "p[class*='product-tile-unit-price']"),
 ]
 ```
 
-The `find_price()` function checks each option in order and uses the first one that works. If none match, it raises a useful error instead of returning bad data quietly.
+The Tesco scraper passes these selector lists to `find_price()` and `find_unit_price()`. Each helper checks selectors in order; if none yields a matching value, it raises an error rather than silently returning missing data.
 
-### Normalize Edge Cases Handled
+### Price Normalization
 
-Real supermarket data is messy. Some weights are shown as "200g", some as "1.5kg", and prices may be written as "£2.50" or "45p". The `normalize_price()` logic handles these cases:
+The standalone `normalize_price()` function handles item prices such as "£2.50" or "45p" and weights such as "200g", "1.5kg", or "1000mg". The live scrapers currently call `normalize_unit_price()` instead: it converts displayed unit prices in `/100g` or `/kg` format into price per 100g. For example:
 
-- currency values like "£" and "p"
-- weight units like grams, kilograms, and milligrams
-- spacing issues like " £1.50 " and "£1.50"
-- zero-weight protection to prevent division errors
-- rounding for clean, consistent results
+```text
+£0.82/100g → 0.82
+£8.20/kg   → 0.82
+```
 
-This is important because the comparison should be fair. If you normalize correctly, a 200g item and a 1kg item can be compared properly.
+Both functions are covered by the normalization tests, but only `normalize_unit_price()` is used in the current scraping flow. The displayed unit price must be in one of its supported formats for normalization to succeed.
 
 ### Database Schema: Raw + Computed Values
 
@@ -207,7 +210,7 @@ The database test uses an in-memory SQLite database, so it checks that:
 
 The normalize tests check the price conversion logic, including different currency and weight formats, invalid values, and zero-weight protection.
 
-The selector tests validate the scraper configuration itself by checking that the Tesco and Sainsburys product selectors are valid CSS selectors and that the product name and price selectors are set up correctly for each store. This helps catch broken selectors early before the scraper tries to parse the page.
+The selector tests check that the example selector values in `tests/test_selector.py` are non-empty CSS selector strings. They do not inspect the live selectors configured in either scraper, parse selectors for CSS validity, or check them against current supermarket pages.
 
 If needed, install pytest first:
 
@@ -221,7 +224,7 @@ pip install pytest
 
 The project is now in a stronger position than before:
 
-- `main.py` is working and runs the pipeline
+- `main.py` runs the pipeline for fixed Brie product pages, provided the pages and selectors are available
 - the database schema is storing products, stores, and prices separately
 - the comparison logic is tied to real saved data
 - the JSON API is still the next natural layer to build on top of that data
