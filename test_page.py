@@ -34,22 +34,26 @@ def scrape_sainsburys_category(url):
     for card in cards:
         name = card.find_element(By.CSS_SELECTOR, "[data-testid='gw-product-name']").text.strip()
 
-        # 2. get the shelf price from 'gw-product-retail-price', scoped to card
-        price_el = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price")
-        price = price_el[0].text.strip() if price_el else None
+        prices = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price")
+        units = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price-per-unit")
 
+        if len(prices) == 2:   # deal card
+            deal_price, deal_unit = prices[0].text.strip(), units[0].text.strip()
+            price, unit_price = prices[1].text.strip(), units[1].text.strip()
+        else:
+            price, unit_price = prices[0].text.strip(), units[0].text.strip()
+            deal_price = deal_unit = None
 
-        unit_price_el = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price-per-unit")
-        unit_price = unit_price_el[0].text.strip() if unit_price_el else None
-        # 3. check for a deal: does card.find_elements(...) for
-        #    'gw-product-contextual-price' come back non-empty? store True/False
+        has_deal = deal_price is not None
 
-        deal_el = card.find_elements(By.CSS_SELECTOR, "[data-testid='gw-product-contextual-price']")
-        has_deal = len(deal_el) > 0
-
-
-        products.append({"name": name, "retail_price": price, "unit_price": unit_price, "has_deal": has_deal})
-
+        products.append({
+            "name": name,
+            "retail_price": price,
+            "unit_price": unit_price,
+            "deal_price": deal_price,
+            "deal_unit_price": deal_unit,
+            "has_deal": has_deal,
+        })
     driver.quit()
     return products
 
