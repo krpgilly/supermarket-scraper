@@ -6,3 +6,4 @@ __pycache__/
 todo list
 .env
 CACHEDIR.TAG
+script.py

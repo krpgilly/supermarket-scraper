@@ -1,7 +1,6 @@
-# TODO: test rounding, missing data, weird formats
-
 from database.normalize import normalize_price
 from database.normalize import normalize_unit_price
+from database.normalize import parse_unit_price
 
 def test_basic():
     assert normalize_price("£1.00", "100g") == 1.0
@@ -35,3 +34,18 @@ def test_unit_price_kg_format():
 
 def test_unit_price_unknown_format():
     assert normalize_unit_price("£0.82/unknown") == None
+
+def test_parse_kg():
+    assert parse_unit_price("£10.00 / kg") == (1.0, "100g")
+
+def test_parse_ltr_pence():
+    assert parse_unit_price("73p / ltr") == (0.073, "100ml")
+
+def test_parse_each():
+    assert parse_unit_price("24p / ea") == (0.24, "each")
+
+def test_parse_tesco_litre():
+    assert parse_unit_price("£5.67/litre") == (0.567, "100ml")
+
+def test_parse_unknown():
+    assert parse_unit_price("£1.00 / bunch") is None

@@ -55,3 +55,30 @@ def normalize_unit_price(unit_price_str):
     except Exception as e:
         print(f"Error normalising unit price ({unit_price_str}):", e)
         return None
+
+def parse_unit_price(unit_price_str):
+    try:
+        clean = unit_price_str.lower().replace("£", "").replace("(", "").replace(")", "").replace(" ", "").strip()
+
+        amount, unit = clean.split("/")
+
+        if amount.endswith("p"):
+            amount = float(amount.replace("p", "")) / 100
+        else:
+            amount = float(amount)
+
+        if unit == "kg":
+            return round(amount / 10, 3), "100g"
+        elif unit == "100g":
+            return round(amount, 3), "100g"
+        elif unit in ("ltr", "litre"):
+            return round(amount / 10, 3), "100ml"
+        elif unit == "100ml":
+            return round(amount, 3), "100ml"
+        elif unit in ("ea", "each"):
+            return round(amount, 3), "each"
+    except Exception as e:
+        print(f"Unknown unit: {unit_price_str}")
+        return None
+
+  
