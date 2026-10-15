@@ -27,7 +27,14 @@ def init_db():
 
             raw_price TEXT,
             raw_unit_price TEXT,
-            price_per_100g REAL,
+            unit_value REAL,
+            unit_type TEXT,
+
+            deal_price TEXT,
+            raw_deal_unit_price TEXT,
+            deal_unit_value REAL,
+            deal_unit_type TEXT,
+            has_deal INTEGER,
 
             scraped_at TEXT,
 
@@ -38,9 +45,6 @@ def init_db():
 
     conn.commit()
     conn.close()
-
-if __name__ == "__main__":
-    init_db()
 
 def get_or_create_store(cur, name):
     cur.execute("SELECT id FROM stores WHERE name = ?", (name,))
@@ -62,23 +66,38 @@ def get_or_create_product(cur, name):
     cur.execute("INSERT INTO products (name) VALUES (?)", (name,))
     return cur.lastrowid
 
-def insert_price(conn, store_name, product_name, price_data):
+def insert_price(conn, store_name, price_data):
     cur = conn.cursor()
 
     store_id = get_or_create_store(cur, store_name)
-    product_id = get_or_create_product(cur, product_name)
+    product_id = get_or_create_product(cur, price_data["name"])
 
     cur.execute(
-        "INSERT INTO prices (store_id, product_id, raw_price, raw_unit_price, price_per_100g, scraped_at) VALUES (?, ?, ?, ?, ?, ?)",
-
+        """
+        INSERT INTO prices (
+            store_id, product_id,
+            raw_price, raw_unit_price, unit_value, unit_type,
+            deal_price, raw_deal_unit_price, deal_unit_value, deal_unit_type,
+            has_deal, scraped_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
         (
             store_id,
             product_id,
-            price_data.get("price"),
-            price_data.get("raw_unit_price"),
-            price_data.get("price_per_100g"),
-            datetime.now().isoformat()
-        )
+            price_data.get("retail_price"),
+            price_data.get("unit_price"),
+            price_data.get("unit_value"),
+            price_data.get("unit_type"),
+            price_data.get("deal_price"),
+            price_data.get("deal_unit_price"),
+            price_data.get("deal_unit_value"),
+            price_data.get("deal_unit_type"),
+            1 if price_data.get("has_deal") else 0,
+            datetime.now().isoformat(),
+        ),
     )
 
     conn.commit()
+
+if __name__ == "__main__":
+    init_db()
