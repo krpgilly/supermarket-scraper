@@ -8,9 +8,9 @@ from selenium.common.exceptions import TimeoutException
 from database.normalize import parse_unit_price
 
 
-def scrape_sainsburys_category(url):
+SAINSBURYS_DAIRY_URL = "https://www.sainsburys.co.uk/groceries/browse/chilled-food/dairy-and-chilled-essentials/c:1019022/brand:sainsbury%27s"
 
-    url = "https://www.sainsburys.co.uk/groceries/browse/chilled-food/dairy-and-chilled-essentials/c:1019022/brand:sainsbury%27s"
+def scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.get(url)

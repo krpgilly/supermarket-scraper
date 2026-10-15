@@ -1,6 +1,7 @@
 import sqlite3
+from scrapers.sainsburys_scraper_cat import scrape_sainsburys_category, SAINSBURYS_DAIRY_URL
 from scrapers.tesco_scraper import scrape_tesco
-from scrapers.sainsburys_scraper import scrape_sainsburys
+from scrapers.sainsburys_scraper_cat import scrape_sainsburys_category
 from database.db import init_db, insert_price
 
 
@@ -13,10 +14,11 @@ def main():
         insert_price(conn, "Tesco", "Brie", tesco_result)
         conn.close()
 
-    sainsburys_result = scrape_sainsburys()
-    if sainsburys_result:
+    sainsburys_products = scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL)
+    if sainsburys_products:
         conn = sqlite3.connect("products.db")
-        insert_price(conn, "Sainsburys", "Brie", sainsburys_result)
+        for product in sainsburys_products:
+            insert_price(conn, "Sainsburys", product)
         conn.close()
 
 if __name__ == "__main__":
