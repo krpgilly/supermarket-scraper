@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import re
 from scrapers.find_price import find_unit_price
-from database.normalize import normalize_unit_price
+from database.normalize import parse_unit_price
 
 
 def scrape_sainsburys_category(url):
@@ -18,7 +18,6 @@ def scrape_sainsburys_category(url):
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.get(url)
 
-    # 1. wait until at least one card exists (use WebDriverWait + EC like before)
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='gw-product-card']"))
@@ -37,7 +36,7 @@ def scrape_sainsburys_category(url):
         prices = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price")
         units = card.find_elements(By.CSS_SELECTOR, "span.ds-c-price__price-per-unit")
 
-        if len(prices) == 2:   # deal card
+        if len(prices) == 2:
             deal_price, deal_unit = prices[0].text.strip(), units[0].text.strip()
             price, unit_price = prices[1].text.strip(), units[1].text.strip()
         else:
@@ -45,6 +44,14 @@ def scrape_sainsburys_category(url):
             deal_price = deal_unit = None
 
         has_deal = deal_price is not None
+        parsed = parse_unit_price(unit_price)
+        unit_value, unit_type = parsed if parsed else (None, None)
+
+        deal_value, deal_type = (None, None)
+        if deal_unit:
+            parsed_deal = parse_unit_price(deal_unit)
+            if parsed_deal:
+                deal_value, deal_type = parsed_deal
 
         products.append({
             "name": name,
@@ -53,10 +60,15 @@ def scrape_sainsburys_category(url):
             "deal_price": deal_price,
             "deal_unit_price": deal_unit,
             "has_deal": has_deal,
+            "unit_value": unit_value,
+            "unit_type": unit_type,
+            "deal_unit_value": deal_value,
+            "deal_unit_type": deal_type,
         })
     driver.quit()
     return products
 
 if __name__ == "__main__":
-    for p in scrape_sainsburys_category("PASTE_URL_HERE"):
+    url = "https://www.sainsburys.co.uk/groceries/browse/chilled-food/dairy-and-chilled-essentials/c:1019022/brand:sainsbury%27s"
+    for p in scrape_sainsburys_category(url):
         print(p)

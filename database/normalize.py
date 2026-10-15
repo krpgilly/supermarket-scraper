@@ -77,6 +77,9 @@ def parse_unit_price(unit_price_str):
             return round(amount, 3), "100ml"
         elif unit in ("ea", "each"):
             return round(amount, 3), "each"
+        else:
+            print(f"Unknown unit: {unit_price_str}")
+            return None
     except Exception as e:
         print(f"Unknown unit: {unit_price_str}")
         return None
