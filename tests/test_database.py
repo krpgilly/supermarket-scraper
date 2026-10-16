@@ -20,22 +20,29 @@ def memory_db(monkeypatch):
     anchor_conn.close()
 
 def test_insert_price_creates_records_and_saves_data(memory_db):
-    store_name = "Lidl"
+    store_name = "Sainsburys"
     product_name = "Brie"
     mock_price_data = {
-        "price": "£1.65",
-        "raw_unit_price": "82.5p per 100g",
-        "price_per_100g": 0.82
+        "name": "Brie",
+        "retail_price": "£1.65",
+        "unit_price": "82.5p per 100g",
+        "unit_value": 0.82,
+        "unit_type": "100g",
+        "deal_price": None,
+        "deal_unit_price": None,
+        "deal_unit_value": None,
+        "deal_unit_type": None,
+        "has_deal": False
     }
     
-    insert_price(memory_db, store_name, product_name, mock_price_data)
+    insert_price(memory_db, store_name, mock_price_data)
     
     cur = memory_db.cursor()
 
     cur.execute("SELECT id, name FROM stores WHERE name = ?", (store_name,))
     store_record = cur.fetchone()
     assert store_record is not None, "Store record was not created."
-    assert store_record[1] == "Lidl"
+    assert store_record[1] == "Sainsburys"
     
     cur.execute("SELECT id, name FROM products WHERE name = ?", (product_name,))
     product_record = cur.fetchone()
@@ -43,7 +50,7 @@ def test_insert_price_creates_records_and_saves_data(memory_db):
     assert product_record[1] == "Brie"
     
     cur.execute("""
-        SELECT store_id, product_id, raw_price, raw_unit_price, price_per_100g, scraped_at 
+        SELECT store_id, product_id, raw_price, raw_unit_price, unit_value, scraped_at 
         FROM prices
     """)
     price_record = cur.fetchone()
