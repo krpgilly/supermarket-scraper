@@ -7,3 +7,4 @@ todo list
 .env
 CACHEDIR.TAG
 script.py
+__init__.py

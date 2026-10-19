@@ -66,6 +66,5 @@ def scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
     return products
 
 if __name__ == "__main__":
-    url = "https://www.sainsburys.co.uk/groceries/browse/chilled-food/dairy-and-chilled-essentials/c:1019022/brand:sainsbury%27s"
-    for p in scrape_sainsburys_category(url):
+    for p in scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
         print(p)
