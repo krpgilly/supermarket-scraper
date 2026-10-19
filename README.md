@@ -132,6 +132,39 @@ python -m pytest tests/ -v
 
 The database tests check that store, product, and price records are inserted. The normalization tests cover supported price and unit formats. The selector tests validate example selector strings; they do not verify the live selectors used by the category scrapers or test them against supermarket pages.
 
+## Planned JSON API
+
+The basic idea behind the project is still the same: collect prices from supermarkets, normalize them, and make the comparison easy to use.
+
+The next useful step is a simple JSON API that exposes the saved data in a clean format.
+
+This would let you:
+
+- return product comparison data as JSON
+- query prices across both stores for one item
+- see historical price changes over time
+
+Why this is a good next step:
+
+1. **Accessibility**: JSON is easier for scripts, apps, and websites to consume than reading SQLite directly.
+2. **Separation**: the scraper can keep doing its job while the API simply serves the stored results.
+3. **Extensibility**: once the data is in JSON, it is easier to build a small frontend or a more advanced product tracker later.
+
+An example of the kind of output we want:
+
+```bash
+GET /api/compare?product=brie&store=lidl,tesco
+→ {
+    "product": "brie",
+    "results": [
+      {"store": "lidl", "price_per_100g": 0.82, "scraped_at": "2026-08-14T10:30:00"},
+      {"store": "tesco", "price_per_100g": 0.95, "scraped_at": "2026-08-14T10:30:00"}
+    ]
+  }
+```
+
+This is still a future step, but it fits the same project scope: the scraper gathers the numbers, the database stores them, and the API would just make them easier to use.
+
 ## Current Limitations and Possible Next Steps
 
 - The category URLs and selectors are fixed in the scraper modules.
