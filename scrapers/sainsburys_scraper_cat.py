@@ -10,9 +10,8 @@ from database.normalize import parse_unit_price
 
 SAINSBURYS_DAIRY_URL = "https://www.sainsburys.co.uk/groceries/browse/chilled-food/dairy-and-chilled-essentials/c:1019022/brand:sainsbury%27s"
 
-def scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
+def scrape_sainsburys_category(driver, url=SAINSBURYS_DAIRY_URL):
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.get(url)
 
     try:
@@ -21,7 +20,6 @@ def scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
         )
     except TimeoutException:
         print("Timeout occurred while waiting for product cards.")
-        driver.quit()
         return []
 
     cards = driver.find_elements(By.CSS_SELECTOR, "[data-testid='gw-product-card']")
@@ -62,9 +60,12 @@ def scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
             "deal_unit_value": deal_value,
             "deal_unit_type": deal_type,
         })
-    driver.quit()
     return products
 
 if __name__ == "__main__":
-    for p in scrape_sainsburys_category(url=SAINSBURYS_DAIRY_URL):
-        print(p)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    try:
+        for p in scrape_sainsburys_category(driver, url=SAINSBURYS_DAIRY_URL):
+            print(p)
+    finally:
+        driver.quit()
