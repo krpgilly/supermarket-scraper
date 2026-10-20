@@ -20,13 +20,23 @@ def tiles_ready(driver):
 
 def scrape_tesco_category(driver, url=TESCO_DAIRY_URL):
 
-    driver.get(url)
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    driver.execute_script("window.scrollTo(0, 0);")
+    for attempt in range(2):
+        driver.get(url)
+        try:
+            WebDriverWait(driver, 60).until(tiles_ready)
+            break
+        except TimeoutException:
+            print(f"Tiles not ready (attempt {attempt + 1})")
+
+    if "access denied" in driver.title.lower() or "access denied" in driver.page_source[:2000].lower():
+        print("Blocked by Tesco, stopping")
+        return []
+    #driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    #time.sleep(2)
+    #driver.execute_script("window.scrollTo(0, 0);")
 
     try:
-        WebDriverWait(driver, 20).until(tiles_ready)
+        WebDriverWait(driver, 60).until(tiles_ready)
     except TimeoutException:
         print("Tiles never fully rendered")
     cards = driver.find_elements(By.CSS_SELECTOR, "ul[data-testid='dynamic-grid'] > li")
