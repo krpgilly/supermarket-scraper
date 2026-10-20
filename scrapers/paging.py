@@ -10,7 +10,7 @@ def tesco_url(base, page):
     return base.replace("sortBy=relevance", f"sortBy=relevance&page={page}")
 
 
-def scrape_all_pages(driver, scrape_fn, base_url, build_url, max_pages=2):
+def scrape_all_pages(driver, scrape_fn, base_url, build_url, max_pages=20):
     all_products = []
     seen = set()
 
@@ -21,7 +21,7 @@ def scrape_all_pages(driver, scrape_fn, base_url, build_url, max_pages=2):
             break
 
         new = [p for p in products if p["name"] not in seen]
-        if not new:
+        if not new:          # page of repeats, so we've run past the end
             break
 
         seen.update(p["name"] for p in new)
