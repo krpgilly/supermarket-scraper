@@ -16,6 +16,14 @@ The category URLs are defined by `SAINSBURYS_DAIRY_URL` in `scrapers/sainsburys_
 
 If a scraper times out waiting for product cards, it returns an empty list and the pipeline continues to the next store. Products are only inserted when the scraper returns results.
 
+### Category scraping and pagination
+
+The current `main.py` workflow scrapes category listing pages rather than visiting individual product pages. It reads the product cards from each page, collects the available price and unit-price fields, and passes the products to the database insert functions.
+
+Pagination is handled by `scrapers/paging.py`. The Sainsbury's URL builder adds `/opt/page:<number>` for pages after the first. The Tesco URL builder adds a `page` query parameter after `sortBy=relevance`. The current run is capped at three Sainsbury's pages and four Tesco pages. For either store, paging stops early when a page returns no products or contains no product names that have not already been collected. Product names are used to avoid adding the same products from overlapping pages twice. After each page with new products, the scraper waits for a random 15 to 25 seconds before continuing.
+
+Tesco has an additional Akamai-related workaround: instead of reusing the same browser session across pages, the scraper creates a fresh Chrome driver for each Tesco page and closes it after that page is scraped. This is the path used by `main.py` to reduce the access-denied blocking encountered when paging Tesco with a reused session. Sainsbury's continues to use the shared driver.
+
 ## Data Collected
 
 Each product record is keyed by its name. Each scrape can add a price row containing the displayed retail price and unit-price text, the parsed unit value and type, available deal fields, and the scrape timestamp. The database schema also stores a reference to the store and product.
