@@ -3,7 +3,7 @@ SAINSBURYS_URLS = [
 ]
 
 TESCO_URLS = [
-    "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/milk-butter-and-eggs/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest%7C%7Cbrands%3ATESCO+ORGANIC&count=24#top"
+    "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/milk-butter-and-eggs/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest%7C%7Cbrands%3ATESCO+ORGANIC&count=24#top",
     "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/cheese/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest&count=24#top",
-    #"https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/yogurts/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest&count=24"
+    "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/yogurts/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest&count=24"
 ]
