@@ -41,7 +41,6 @@ def scrape_tesco_category(driver, url=TESCO_DAIRY_URL):
         print("Tiles never fully rendered")
     cards = driver.find_elements(By.CSS_SELECTOR, "ul[data-testid='dynamic-grid'] > li")
     print(len(cards))   # expect 24
-    print(cards[0].get_attribute("outerHTML")[:2000])
 
     products = []
     for card in cards:
