@@ -4,25 +4,23 @@ A Python project that scrapes grocery category pages from Tesco and Sainsbury's 
 
 ## What It Does
 
-Running `main.py` performs these steps in order:
+Running `main.py` with a store argument performs these steps:
 
 1. Creates the `stores`, `products`, and `prices` tables in `products.db` if they do not already exist.
-2. Opens the configured Sainsbury's dairy and chilled category page and collects its product cards.
-3. Saves each returned Sainsbury's product and its price data.
-4. Opens the configured Tesco milk, butter, and eggs category page and collects its product cards.
-5. Saves each returned Tesco product and its price data.
+2. Selects the configured category URL or URLs for that store.
+3. Opens each category page, collects its product cards, and saves the returned products and price data.
 
-The category URLs are defined by `SAINSBURYS_DAIRY_URL` in `scrapers/sainsburys_scraper_cat.py` and `TESCO_DAIRY_URL` in `scrapers/tesco_scraper_cat.py`. Both scrapers use Selenium to drive Chrome and `webdriver-manager` to obtain ChromeDriver. The page structure and selectors are specific to the current supermarket websites, so website changes or access restrictions can prevent a scrape from succeeding.
+The category URL lists are defined in `config.py` as `SAINSBURYS_URLS` and `TESCO_URLS`. Both scrapers use Selenium to drive Chrome and `webdriver-manager` to obtain ChromeDriver. The page structure and selectors are specific to the current supermarket websites, so website changes or access restrictions can prevent a scrape from succeeding.
 
 If a scraper times out waiting for product cards, it returns an empty list and the pipeline continues to the next store. Products are only inserted when the scraper returns results.
 
 ### Category scraping and pagination
 
-The current `main.py` workflow scrapes category listing pages rather than visiting individual product pages. It reads the product cards from each page, collects the available price and unit-price fields, and passes the products to the database insert functions.
+The current `main.py` workflow scrapes the selected category listing pages rather than visiting individual product pages. It reads the product cards from each page, collects the available price and unit-price fields, and passes the products to the database insert functions.
 
-Pagination is handled by `scrapers/paging.py`. The Sainsbury's URL builder adds `/opt/page:<number>` for pages after the first. The Tesco URL builder adds a `page` query parameter after `sortBy=relevance`. The current run is capped at three Sainsbury's pages and four Tesco pages. For either store, paging stops early when a page returns no products or contains no product names that have not already been collected. Product names are used to avoid adding the same products from overlapping pages twice. After each page with new products, the scraper waits for a random 15 to 25 seconds before continuing.
+Pagination is handled by `scrapers/paging.py`. The Sainsbury's URL builder adds `/opt/page:<number>` for pages after the first. The Tesco URL builder adds a `page` query parameter after `sortBy=relevance`. Each category run is capped at six pages. Paging stops early when a page returns no products or contains no product names that have not already been collected. Product names are used to avoid adding the same products from overlapping pages twice. After each page with new products, the scraper waits for a random 15 to 25 seconds before continuing. Tesco pagination also stops when a page contains fewer than 24 products.
 
-Tesco has an additional Akamai-related workaround: instead of reusing the same browser session across pages, the scraper creates a fresh Chrome driver for each Tesco page and closes it after that page is scraped. This is the path used by `main.py` to reduce the access-denied blocking encountered when paging Tesco with a reused session. Sainsbury's continues to use the shared driver.
+Tesco has an additional Akamai-related workaround: instead of reusing the same browser session across pages, the scraper creates a fresh Chrome driver for each Tesco page and closes it after that page is scraped. This is the path used by `main.py` to reduce the access-denied blocking encountered when paging Tesco with a reused session. Sainsbury's continues to use a shared driver for its category URLs. When scraping multiple Tesco categories, `main.py` waits for a random 30 to 60 seconds between categories.
 
 ## Data Collected
 
@@ -93,11 +91,31 @@ pip install pytest
 
 ### 3. Run the scraper
 
-From the project root:
+Run commands from the project root. The store argument is required:
 
 ```bash
-python main.py
+python main.py sainsburys
+python main.py tesco
 ```
+
+The Sainsbury's command scrapes every URL in `SAINSBURYS_URLS`. The Tesco command, without `--category`, scrapes every URL in `TESCO_URLS`. Use the zero-based `--category` index to run one Tesco URL by itself:
+
+```bash
+python main.py tesco --category 0
+python main.py tesco --category 1
+python main.py tesco --category 2
+```
+
+The category indexes correspond to the order of the URLs in `config.py`:
+
+| Store | Index | Category |
+| --- | ---: | --- |
+| Sainsbury's | — | Dairy and chilled essentials (all configured Sainsbury's URLs) |
+| Tesco | 0 | Milk, butter, and eggs |
+| Tesco | 1 | Cheese |
+| Tesco | 2 | Yogurts |
+
+`--category` applies to Tesco; Sainsbury's runs all configured Sainsbury's URLs. To change the categories or add another category URL, edit the corresponding list in `config.py`. Sainsbury's category URLs are paged by adding `/opt/page:<number>`; Tesco category URLs are paged by adding a `page` query parameter.
 
 The database is created automatically in the project root as `products.db`. To initialize it without scraping:
 
@@ -112,8 +130,11 @@ database/
   db.py                       # SQLite schema and insert functions
   normalize.py                # Unit-price parsing and normalization
 
+config.py                     # Configured Sainsbury's and Tesco category URL lists
+
 scrapers/
   find_price.py               # Fallback helpers used by the individual-product scrapers
+  paging.py                   # Category pagination and store-specific URL builders
   sainsburys_scraper_cat.py   # Sainsbury's category scraper used by main.py
   sainsburys_scraper_sing.py  # Individual Sainsbury's product scraper
   tesco_scraper_cat.py        # Tesco category scraper used by main.py
@@ -124,7 +145,7 @@ tests/
   test_normalize.py           # Price and unit parsing behavior
   test_selector.py            # Checks example selector definitions
 
-main.py                       # Runs both category scrapers and saves their results
+main.py                       # Selects store/category scrapers and saves their results
 products.db                   # Local SQLite database, created when the app runs
 ```
 

@@ -7,3 +7,8 @@ TESCO_URLS = [
     "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/cheese/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest&count=24#top",
     "https://www.tesco.com/shop/en-GB/browse/groceries-and-essentials/fresh-food/yogurts/all?sortBy=relevance&facetsArgs=brands%3ATESCO%7C%7Cbrands%3ATESCO+finest&count=24"
 ]
+
+#python main.py sainsburys
+#python main.py tesco --category 0
+#python main.py tesco --category 1
+#python main.py tesco --category 2
