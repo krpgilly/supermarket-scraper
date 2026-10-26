@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from database.filters import is_dairy
 
 def init_db():
     conn = sqlite3.connect("products.db")
@@ -43,6 +44,14 @@ def init_db():
         );
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE,
+    is_dairy INTEGER
+        );
+    """)
+
     conn.commit()
     conn.close()
 
@@ -63,7 +72,7 @@ def get_or_create_product(cur, name):
     if row:
         return row[0]
 
-    cur.execute("INSERT INTO products (name) VALUES (?)", (name,))
+    cur.execute("INSERT INTO products (name, is_dairy) VALUES (?, ?)", (name, 1 if is_dairy(name) else 0))
     return cur.lastrowid
 
 def insert_price(conn, store_name, price_data):

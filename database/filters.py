@@ -3,7 +3,8 @@ import re
 DAIRY_WORDS = [
     "milk", "cheese", "cheddar", "butter", "yogurt", "yoghurt",
     "eggs", "brie", "mozzarella", "feta", "halloumi",
-    "parmesan", "parmigiano",
+    "parmesan", "parmigiano",  "double cream", "single cream", "whipping cream",
+    "creme fraiche", "dairy drink",
 ]
 
 NOT_DAIRY_WORDS = [

@@ -14,3 +14,18 @@ def test_quiche_out():
 
 def test_custard_tart_out():
     assert not is_dairy("Sainsbury's Egg Custard Tarts 4 x 81g")
+
+def test_double_cream_in():
+    assert is_dairy("Sainsbury's Double Cream 300ml")
+
+def test_buttersoft_in():
+    assert is_dairy("Sainsbury's Buttersoft Spreadable 500g")
+
+def test_dairy_drink_in():
+    assert is_dairy("Sainsbury's Everyday Lactose Free Semi Skimmed Dairy Drink 1L")
+
+def test_soured_cream_dip_out():
+    assert not is_dairy("Sainsbury's Soured Cream & Chive Dip 200g")
+
+def test_soya_drink_out():
+    assert not is_dairy("Sainsbury's Unsweetened Soya Drink 1L")
