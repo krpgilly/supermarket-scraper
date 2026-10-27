@@ -128,7 +128,9 @@ python -m database.db
 ```text
 database/
   db.py                       # SQLite schema and insert functions
+  filters.py                  # Dairy-product name filtering
   normalize.py                # Unit-price parsing and normalization
+  __init__.py                 # Database package marker
 
 config.py                     # Configured Sainsbury's and Tesco category URL lists
 
@@ -142,14 +144,21 @@ scrapers/
 
 tests/
   test_database.py            # Database insert behavior
+  test_filters.py             # Dairy-product filter behavior
   test_normalize.py           # Price and unit parsing behavior
   test_selector.py            # Checks example selector definitions
 
 main.py                       # Selects store/category scrapers and saves their results
+check_db.py                   # Prints database counts and saved product prices
+check_filter.py               # Lists products rejected by the dairy filter
+check_filters.py              # Lists products accepted by the dairy filter
+script.py                     # Standalone unit-price parsing experiment
+test_page2.py                 # Standalone Tesco page inspection script
 products.db                   # Local SQLite database, created when the app runs
 ```
 
 The individual-product scrapers and `find_price.py` remain in the repository, but they are not called by the current `main.py` workflow.
+The `check_*.py`, `script.py`, and `test_page2.py` files are standalone inspection or experiment scripts; they are not part of the normal scraping workflow.
 
 ## Testing
 
@@ -203,3 +212,17 @@ This is still a future step, but it fits the same project scope: the scraper gat
 - Each run adds price history, but there is no query interface or scheduled scraper.
 
 A future JSON API or small dashboard could expose historical prices and compare products after product matching is added.
+
+## Helpful follow-up notes
+
+A few practical things are worth keeping in mind when running the scraper for the first time:
+
+- ChromeDriver is downloaded automatically with `webdriver-manager`, but Google Chrome still needs to be installed and available to the system.
+- If Tesco starts returning empty results, it often means the site blocked a browser session; the project deliberately creates a fresh driver for each Tesco page to reduce that problem.
+- To quickly inspect the database without opening a SQLite client, you can run:
+
+```bash
+python -c "import sqlite3; conn = sqlite3.connect('products.db'); print(conn.execute('SELECT COUNT(*) FROM products').fetchone()[0])"
+```
+
+This gives a quick sanity check that products are being inserted after a scrape.
