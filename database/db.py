@@ -46,9 +46,8 @@ def init_db():
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE,
-    is_dairy INTEGER
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE
         );
     """)
 
@@ -72,7 +71,7 @@ def get_or_create_product(cur, name):
     if row:
         return row[0]
 
-    cur.execute("INSERT INTO products (name, is_dairy) VALUES (?, ?)", (name, 1 if is_dairy(name) else 0))
+    cur.execute("INSERT INTO products (name) VALUES (?)", (name,))
     return cur.lastrowid
 
 def insert_price(conn, store_name, price_data):

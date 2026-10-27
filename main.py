@@ -10,6 +10,7 @@ from config import SAINSBURYS_URLS, TESCO_URLS
 import time
 import random
 import argparse
+from database.filters import is_dairy
 
 
 def make_driver():
@@ -20,8 +21,9 @@ def run_sainsburys(conn):
     try:
         for base_url in SAINSBURYS_URLS:
             products = scrape_all_pages(
-                driver, scrape_sainsburys_category, base_url, sainsburys_url, max_pages=6
+                driver, scrape_sainsburys_category, base_url, sainsburys_url, max_pages=4
             )
+            products = [p for p in products if is_dairy(p["name"])]
             for p in products:
                 insert_price(conn, "Sainsburys", p)
             print(f"Sainsburys: inserted {len(products)}")
@@ -39,6 +41,7 @@ def run_tesco(conn, urls):
         products = scrape_all_pages_fresh(
             scrape_tesco_category, base_url, tesco_url, make_driver, max_pages=6
         )
+        products = [p for p in products if is_dairy(p["name"])]
         for p in products:
             insert_price(conn, "Tesco", p)
         print(f"Tesco: inserted {len(products)}")
