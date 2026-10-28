@@ -130,7 +130,6 @@ database/
   db.py                       # SQLite schema and insert functions
   filters.py                  # Dairy-product name filtering
   normalize.py                # Unit-price parsing and normalization
-  __init__.py                 # Database package marker
 
 config.py                     # Configured Sainsbury's and Tesco category URL lists
 
@@ -149,16 +148,7 @@ tests/
   test_selector.py            # Checks example selector definitions
 
 main.py                       # Selects store/category scrapers and saves their results
-check_db.py                   # Prints database counts and saved product prices
-check_filter.py               # Lists products rejected by the dairy filter
-check_filters.py              # Lists products accepted by the dairy filter
-script.py                     # Standalone unit-price parsing experiment
-test_page2.py                 # Standalone Tesco page inspection script
-products.db                   # Local SQLite database, created when the app runs
 ```
-
-The individual-product scrapers and `find_price.py` remain in the repository, but they are not called by the current `main.py` workflow.
-The `check_*.py`, `script.py`, and `test_page2.py` files are standalone inspection or experiment scripts; they are not part of the normal scraping workflow.
 
 ## Testing
 
