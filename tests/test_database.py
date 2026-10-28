@@ -63,3 +63,47 @@ def test_insert_price_creates_records_and_saves_data(memory_db):
     assert price_record[4] == 0.82          
     assert price_record[5] is not None
 
+SAMPLE = {
+    "name": "Test Mature Cheddar 400g",
+    "retail_price": "£2.95",
+    "unit_price": "£7.38 / kg",
+    "unit_value": 0.738,
+    "unit_type": "100g",
+    "deal_price": None,
+    "deal_unit_price": None,
+    "deal_unit_value": None,
+    "deal_unit_type": None,
+    "has_deal": False,
+}
+
+
+def count_rows():
+    conn = sqlite3.connect("products.db")
+    n = conn.execute("SELECT COUNT(*) FROM prices").fetchone()[0]
+    conn.close()
+    return n
+
+
+def test_unchanged_price_not_inserted(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    init_db()
+    conn = sqlite3.connect("products.db")
+
+    assert insert_price(conn, "Sainsburys", SAMPLE) is True
+    assert insert_price(conn, "Sainsburys", SAMPLE) is False
+    conn.close()
+
+    assert count_rows() == 1
+
+
+def test_changed_unit_price_inserts_new_row(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    init_db()
+    conn = sqlite3.connect("products.db")
+
+    insert_price(conn, "Sainsburys", SAMPLE)
+    changed = {**SAMPLE, "unit_value": 0.80, "retail_price": "£3.20"}
+    assert insert_price(conn, "Sainsburys", changed) is True
+    conn.close()
+
+    assert count_rows() == 2

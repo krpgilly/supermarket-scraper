@@ -80,6 +80,27 @@ def insert_price(conn, store_name, price_data):
     store_id = get_or_create_store(cur, store_name)
     product_id = get_or_create_product(cur, price_data["name"])
 
+
+    cur.execute("""
+        SELECT unit_value, unit_type, deal_unit_value
+        FROM prices
+        WHERE store_id = ? AND product_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+        """, (store_id, product_id),
+    )
+    latest = cur.fetchone()
+
+    new = (
+        price_data.get("unit_value"),
+        price_data.get("unit_type"),
+        price_data.get("deal_unit_value"),
+    )
+
+    if latest == new:
+        conn.commit
+        return False
+    
     cur.execute(
         """
         INSERT INTO prices (
@@ -106,6 +127,7 @@ def insert_price(conn, store_name, price_data):
     )
 
     conn.commit()
+    return True
 
 if __name__ == "__main__":
     init_db()

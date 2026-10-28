@@ -29,3 +29,6 @@ def test_soured_cream_dip_out():
 
 def test_soya_drink_out():
     assert not is_dairy("Sainsbury's Unsweetened Soya Drink 1L")
+
+def test_creme_fraiche_in():
+    assert is_dairy("Sainsbury's British Crème Fraîche 300ml")
