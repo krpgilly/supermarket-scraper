@@ -216,3 +216,21 @@ python -c "import sqlite3; conn = sqlite3.connect('products.db'); print(conn.exe
 ```
 
 This gives a quick sanity check that products are being inserted after a scrape.
+
+## Database and tests
+
+The scraper writes its results to a local SQLite database named `products.db` in the project root. The database schema creates separate `stores`, `products`, and `prices` tables so each scrape can keep a historical record of price observations alongside the supermarket and product metadata.
+
+The project also includes a small pytest suite to validate the database inserts and the unit/price parsing logic. Run the full test set from the project root with:
+
+```bash
+python -m pytest tests/ -v
+```
+
+The tests cover:
+
+- database inserts for stores, products, and prices
+- supported price and unit parsing formats
+- selector examples used in the scraper configuration
+
+This keeps the project easy to validate while still allowing new scraping logic to be checked against the existing database behavior.
