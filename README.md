@@ -80,13 +80,7 @@ source .venv/bin/activate
 ### 2. Install dependencies
 
 ```bash
-pip install selenium webdriver-manager
-```
-
-To run the test suite, install pytest as well:
-
-```bash
-pip install pytest
+pip install -r requirements.txt
 ```
 
 ### 3. Run the scraper
