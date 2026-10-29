@@ -82,7 +82,10 @@ def insert_price(conn, store_name, price_data):
 
 
     cur.execute("""
-        SELECT unit_value, unit_type, deal_unit_value
+        SELECT 
+            raw_price, raw_unit_price, unit_value, unit_type,
+            deal_price, raw_deal_unit_price,
+            deal_unit_value, deal_unit_type, has_deal
         FROM prices
         WHERE store_id = ? AND product_id = ?
         ORDER BY id DESC
@@ -92,13 +95,19 @@ def insert_price(conn, store_name, price_data):
     latest = cur.fetchone()
 
     new = (
+        price_data.get("retail_price"),
+        price_data.get("raw_unit_price"),
+        price_data.get("unit_price"),
         price_data.get("unit_value"),
         price_data.get("unit_type"),
+        price_data.get("deal_price"),
+        price_data.get("deal_unit_price"),
         price_data.get("deal_unit_value"),
+        price_data.get("deal_unit_type"),
+        1 if price_data.get("has_deal") else 0,
     )
 
     if latest == new:
-        conn.commit
         return False
     
     cur.execute(
