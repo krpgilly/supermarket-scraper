@@ -50,8 +50,6 @@ def scrape_all_pages_fresh(scrape_fn, base_url, build_url, make_driver, max_page
 
         seen.update(p["name"] for p in new)
         all_products.extend(new)
-        if len(products) < 24:
-            break
         print(f"page {page}: {len(new)} new products")
         time.sleep(random.uniform(15, 25))
 

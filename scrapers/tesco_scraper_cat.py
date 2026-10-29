@@ -14,19 +14,21 @@ def tiles_ready(driver):
     cards = driver.find_elements(By.CSS_SELECTOR, "ul[data-testid='dynamic-grid'] > li")
     if not cards:
         return False
-    links = driver.find_elements(By.CSS_SELECTOR, "ul[data-testid='dynamic-grid'] > li a[class*='product-tile-product-link__link']")
-    units = driver.find_elements(By.CSS_SELECTOR, "ul[data-testid='dynamic-grid'] > li p[class*='product-tile-unit-price__subtext']")
-    return len(links) >= len(cards) and len(units) >= len(cards)
+    ready = 0
+    for c in cards:
+        has_unit = c.find_elements(By.CSS_SELECTOR, "p[class*='product-tile-unit-price__subtext']")
+        if has_unit or "out of stock" in c.text.lower():
+            ready += 1
+    return ready >= len(cards)
 
 def scrape_tesco_category(driver, url=TESCO_DAIRY_URL):
 
-    for attempt in range(2):
-        driver.get(url)
-        try:
-            WebDriverWait(driver, 60).until(tiles_ready)
-            break
-        except TimeoutException:
-            print(f"Tiles not ready (attempt {attempt + 1})")
+    driver.get(url)
+    try:
+        WebDriverWait(driver, 60).until(tiles_ready)
+            
+    except TimeoutException:
+        print(f"Tile not ready; scraping what is available")
 
     if "access denied" in driver.title.lower() or "access denied" in driver.page_source[:2000].lower():
         print("Blocked by Tesco, stopping")
