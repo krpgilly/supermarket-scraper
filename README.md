@@ -50,7 +50,7 @@ CREATE TABLE prices (
 );
 ```
 
-Each run appends price records; it does not overwrite historical rows or match equivalent products across stores. Products with different names are stored as separate products.
+A new price row is added only when its stored price, unit-price, or deal data differs from the latest row for that store and product. Unchanged observations do not create duplicate history rows; existing rows are not overwritten, and equivalent products are not matched across stores. Products with different names are stored as separate products.
 
 ## Setup and Running
 
