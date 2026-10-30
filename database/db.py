@@ -96,7 +96,6 @@ def insert_price(conn, store_name, price_data):
 
     new = (
         price_data.get("retail_price"),
-        price_data.get("raw_unit_price"),
         price_data.get("unit_price"),
         price_data.get("unit_value"),
         price_data.get("unit_type"),
@@ -108,6 +107,7 @@ def insert_price(conn, store_name, price_data):
     )
 
     if latest == new:
+        conn.commit()
         return False
     
     cur.execute(

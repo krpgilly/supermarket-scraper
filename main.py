@@ -24,8 +24,10 @@ def run_sainsburys(conn):
                 driver, scrape_sainsburys_category, base_url, sainsburys_url, max_pages=4
             )
             products = [p for p in products if is_dairy(p["name"])]
+            inserted = 0
             for p in products:
-                insert_price(conn, "Sainsburys", p)
+                if insert_price(conn, "Sainsburys", p):
+                    inserted += 1
             print(f"Sainsburys: inserted {len(products)}")
     finally:
         driver.quit()
@@ -42,8 +44,10 @@ def run_tesco(conn, urls):
             scrape_tesco_category, base_url, tesco_url, make_driver, max_pages=6
         )
         products = [p for p in products if is_dairy(p["name"])]
+        inserted = 0
         for p in products:
-            insert_price(conn, "Tesco", p)
+            if insert_price(conn, "Tesco", p):
+                inserted += 1
         print(f"Tesco: inserted {len(products)}")
 
 def main():
