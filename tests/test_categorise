@@ -1,0 +1,10 @@
+from database.categories import categorise
+
+def test_extra_mature_before_mature():
+    assert categorise("Sainsbury's British Extra Mature Cheddar Cheese 400g") == "extra mature cheddar"
+
+def test_tesco_mature():
+    assert categorise("Tesco Mature Cheddar 400G") == "mature cheddar"
+
+def test_comma_butter():
+    assert categorise("Sainsbury's British Butter, Salted 250g") == "salted butter"

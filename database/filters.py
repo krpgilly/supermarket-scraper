@@ -12,7 +12,7 @@ NOT_DAIRY_WORDS = [
     "tart", "tarts", "quiche", "pasty", "pastry", "pie", "pies",
     "baguette", "tortelloni", "ravioli", "pasta", "fusilli", "penne",
     "tagliatelle", "macaroni", "lasagne", "dip", "houmous",
-    "ready meal", "sausage", "crumble", "pizza", "sandwich", "soup",
+    "ready meal", "sausage", "crumble", "pizza", "sandwich", "soup", "pudding", "cookie", "dough", "bake", "bites", "snack"
 ]
 
 
