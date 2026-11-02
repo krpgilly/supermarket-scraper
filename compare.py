@@ -1,18 +1,5 @@
-# STEP 1: Import required libraries (pandas, sqlite3/sqlalchemy, and a fuzzy matching library like rapidfuzz)
-# STEP 2: Establish a connection to the database ('products.db')
-# STEP 3: Write SQL queries to extract the required tables (Names, Prices, Discount Prices, Prices Per Unit)
-# STEP 4: Load the SQL data into separate Pandas DataFrames
-# STEP 5: Close the database connection
-# STEP 6: Clean and preprocess the data (e.g., standardise text to lowercase, strip extra spaces, handle missing values)
-
-# STEP 7: Merge the dataframes together on a common key (like Product ID) so all details are in one main DataFrame
-# STEP 8: Define a fuzzy matching function to calculate similarity scores between product names
-# STEP 9: Loop or apply the fuzzy matching function across the products to compare them and find close matches
-# STEP 10: Filter and inspect the results to see which products are potential duplicates or matches
-import os
 import pandas as pd
 import sqlite3
-from rapidfuzz import fuzz, process
 from database.categories import categorise
 
 def load_latest():
