@@ -33,13 +33,16 @@ if __name__ == "__main__":
     coverage = df.dropna(subset=["category"]).groupby(["category", "store"]).size().unstack("store").fillna(0)
     print(coverage)
 
+    matched = df.dropna(subset=["category"])
 
-    with open("groups.txt", "w", encoding="utf-8") as f:
-        for unit in ["100g", "100ml"]:
-            for store in ["Sainsburys", "Tesco"]:
-                f.write(f"\n--- {store} {unit} ---\n")
-                names = df[(df.store == store) & (df.unit_type == unit)]["product"].sort_values()
-                for n in names:
-                    f.write(n + "\n")
-
-    print("Wrote groups.txt", os.path.abspath("groups.txt"))
+table = (
+    matched.groupby(["category", "unit_type", "store"])["unit_value"]
+    .mean()
+    .unstack("store")
+    .dropna()
+    .round(3)
+)
+table["cheaper"] = table.apply(
+    lambda r: "Sainsburys" if r["Sainsburys"] < r["Tesco"] else "Tesco", axis=1
+)
+print(table)

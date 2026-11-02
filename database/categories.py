@@ -20,13 +20,17 @@ CATEGORY_RULES = [
     ("creme fraiche", ["creme fraiche"]),
     ("semi skimmed milk", ["semi skimmed milk", "semi skimmed longlife", "semi skimmed uht milk"]),
     ("skimmed milk", ["skimmed milk"]),
-    ("whole milk", ["whole milk"]),
+    ("whole milk", ["whole milk"]), ("medium cheddar slices", ["medium cheddar slices", "medium cheddar cheese slices"]),
+    ("medium cheddar", ["medium cheddar"]),
 ]
 
 def strip_accents(s):
     return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
 def categorise(name):
-    n = strip_accents(name).lower().replace("-", " ")
+    n = strip_accents(name.lower()).replace("-", " ").replace(",", " ")
+    n = " ".join(n.split())
     for category, words in CATEGORY_RULES:
         if has_word(n, words):
             return category
