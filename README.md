@@ -52,6 +52,24 @@ CREATE TABLE prices (
 
 A new price row is added only when its stored price, unit-price, or deal data differs from the latest row for that store and product. Unchanged observations do not create duplicate history rows; existing rows are not overwritten, and equivalent products are not matched across stores. Products with different names are stored as separate products.
 
+### Product Matching – Current Status
+
+The current rule-based categorisation system is a temporary placeholder used to group products into broad categories.
+
+It is **not the intended final product-matching pipeline**.
+
+The planned replacement is a fuzzy-matching system using RapidFuzz, which will:
+
+- Compare individual product names across Tesco and Sainsbury's.
+- Identify likely equivalent products despite differences in naming.
+- Rank potential matches using similarity scores.
+- Account for product variants, pack sizes and quantities to reduce incorrect matches.
+- Preserve the original product records and their associated pricing information.
+
+The eventual goal is to produce individual product comparisons, rather than category-level price averages.
+
+**Planned pipeline:** Data extraction → Data cleaning → Product matching → Match validation → Price comparison → JSON export → FastAPI.
+
 ## Setup and Running
 
 ### Prerequisites
