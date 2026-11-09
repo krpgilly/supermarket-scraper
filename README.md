@@ -1,6 +1,8 @@
 # Tesco vs Sainsbury's Price Scraper
 
-A Python project that scrapes grocery category pages from Tesco and Sainsbury's and stores product prices in a local SQLite database. It keeps the displayed prices and unit prices, along with parsed unit values, so products can be compared using a common unit where possible.
+A Python project that scrapes selected grocery category pages from Tesco and Sainsbury's and stores price observations in a local SQLite database. The current implementation is intentionally focused on dairy and chilled essentials and keeps the displayed retail prices, unit prices, and parsed unit values so products can be compared using a common unit where possible.
+
+> Note: this is a scraper prototype rather than a general-purpose grocery platform. It currently targets a narrow set of product categories, uses fixed website selectors, and depends on live supermarket page structure remaining compatible.
 
 ## What It Does
 
@@ -153,6 +155,14 @@ scrapers/
   tesco_scraper_cat.py        # Tesco category scraper used by main.py
   tesco_scraper.py            # Individual Tesco product scraper
 
+root-level helper scripts:
+  check_db.py                 # Quick database checks
+  check_filter.py             # Quick filter validation
+  check_filters.py            # Batch filter checks
+  compare.py                  # Manual comparison utilities
+  script.py                   # Helper/experimentation script
+  groups.txt                  # Supporting grouping data
+
 tests/
   test_database.py            # Database insert behavior
   test_filters.py             # Dairy-product filter behavior
@@ -160,6 +170,8 @@ tests/
   test_selector.py            # Checks example selector definitions
 
 main.py                       # Selects store/category scrapers and saves their results
+requirements.txt              # Python dependencies
+products.db                  # SQLite database created at runtime in the project root
 ```
 
 ## Testing
@@ -171,6 +183,15 @@ python -m pytest tests/ -v
 ```
 
 The database tests check that store, product, and price records are inserted. The normalization tests cover supported price and unit formats. The selector tests validate example selector strings; they do not verify the live selectors used by the category scrapers or test them against supermarket pages.
+
+## Troubleshooting
+
+A few common issues are worth knowing before the first run:
+
+- Chrome or ChromeDriver not found: install Google Chrome and ensure the browser is available on the system path; `webdriver-manager` will download ChromeDriver automatically.
+- Tesco returns no products or intermittent empty results: the supermarket may be blocking the browser session. The project already retries with fresh browser instances for each Tesco page to reduce this problem.
+- Empty or unexpected product data: the scraper depends on live HTML structure remaining compatible with the configured selectors. Small site updates can break extraction.
+- Product filtering seems too aggressive: the project currently keeps only dairy-related product names via `database.filters.is_dairy()`, so non-dairy categories will be skipped.
 
 ## Planned JSON API
 
