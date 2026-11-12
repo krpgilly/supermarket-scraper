@@ -20,7 +20,7 @@ If a scraper times out waiting for product cards, it returns an empty list and t
 
 The current `main.py` workflow scrapes the selected category listing pages rather than visiting individual product pages. It reads the product cards from each page, collects the available price and unit-price fields, and passes the products to the database insert functions.
 
-Pagination is handled by `scrapers/paging.py`. The Sainsbury's URL builder adds `/opt/page:<number>` for pages after the first. The Tesco URL builder adds a `page` query parameter after `sortBy=relevance`. Each category run is capped at six pages. Paging stops early when a page returns no products or contains no product names that have not already been collected. Product names are used to avoid adding the same products from overlapping pages twice. After each page with new products, the scraper waits for a random 15 to 25 seconds before continuing. Tesco pagination also stops when a page contains fewer than 24 products.
+Pagination is handled by `scrapers/paging.py`. The Sainsbury's URL builder adds `/opt/page:<number>` for pages after the first. The Tesco URL builder adds a `page` query parameter after `sortBy=relevance`. In the current code, Sainsbury's runs cap at four pages and Tesco runs cap at six pages, although either scraper will stop earlier if no new products are found. Paging stops early when a page returns no products or contains no product names that have not already been collected. Product names are used to avoid adding the same products from overlapping pages twice. After each page with new products, the scraper waits for a random 15 to 25 seconds before continuing. Tesco pagination also stops when a page contains fewer than 24 products.
 
 Tesco has an additional Akamai-related workaround: instead of reusing the same browser session across pages, the scraper creates a fresh Chrome driver for each Tesco page and closes it after that page is scraped. This is the path used by `main.py` to reduce the access-denied blocking encountered when paging Tesco with a reused session. Sainsbury's continues to use a shared driver for its category URLs. When scraping multiple Tesco categories, `main.py` waits for a random 30 to 60 seconds between categories.
 
@@ -214,11 +214,11 @@ Why this is a good next step:
 An example of the kind of output we want:
 
 ```bash
-GET /api/compare?product=brie&store=lidl,tesco
+GET /api/compare?product=brie&store=sainsburys,tesco
 → {
     "product": "brie",
     "results": [
-      {"store": "lidl", "price_per_100g": 0.82, "scraped_at": "2026-08-14T10:30:00"},
+      {"store": "sainsburys", "price_per_100g": 0.82, "scraped_at": "2026-08-14T10:30:00"},
       {"store": "tesco", "price_per_100g": 0.95, "scraped_at": "2026-08-14T10:30:00"}
     ]
   }

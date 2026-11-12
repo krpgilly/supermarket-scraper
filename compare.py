@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pandas as pd
 import sqlite3
 from rapidfuzz import process, fuzz
@@ -51,7 +50,7 @@ def write_matches(matches):
             "Closest product candidates (fuzzy matches; not manually verified)\n"
         )
         file.write("Tesco product | Sainsbury's candidate | Similarity score\n")
-        for tesco_product, sainsburys_product, score in matches:
+        for tesco_product, sainsburys_product, score, index in matches:
             file.write(f"{tesco_product} | {sainsburys_product} | {score:.1f}\n")
 
     return output
