@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import sqlite3
 from rapidfuzz import process, fuzz
+import re
 
 
 def load_latest():
@@ -20,6 +21,14 @@ def load_latest():
     return df.sort_values("id").groupby(["store", "product"]).tail(1)
 
 
+def clean(name):
+    n = name.lower()
+    for w in ["sainsbury's", "stamford street co." "tesco", "british"]:
+        n = n.replace(w, "")
+    n = re.sub(r"\d+(\.\d+)?\s*(g|kg|ml|l|litre|pack|pints?)\b", "", n)
+    return " ".join(n.split())
+
+
 def df_split(df):
     tesco = df[df["store"] == "Tesco"]
     sainsburys = df[df["store"] == "Sainsburys"]
@@ -31,14 +40,23 @@ def df_split(df):
 
 def match_products():
     df = load_latest()
-    tesco_products, sainsburys_products = df_split(df)
+    df["clean"] = df["product"].apply(clean)
+
+    tesco = df[df["store"] == "Tesco"]
+    sains = df[df["store"] == "Sainsburys"]
 
     matches = []
 
-    for product in tesco_products:
-        match = process.extractOne(product, sainsburys_products, scorer=fuzz.WRatio)
-        if match is not None and match[1] >= 62:
-            matches.append((product, match[0], match[1], match[2]))
+    for _, t in tesco.iterrows():
+        pool = sains[sains["unit_type"] == t["unit_type"]]
+        if pool.empty:
+            continue
+        match = process.extractOne(
+            t["clean"], pool["clean"].tolist(), scorer=fuzz.WRatio
+        )
+        if match and match[1] >= 62:
+            s = pool.iloc[match[2]]
+            matches.append((t, s, match[1]))
 
     return matches
 
@@ -49,10 +67,20 @@ def write_matches(matches):
         file.write(
             "Closest product candidates (fuzzy matches; not manually verified)\n"
         )
-        file.write("Tesco product | Sainsbury's candidate | Similarity score\n")
-        for tesco_product, sainsburys_product, score, index in matches:
-            file.write(f"{tesco_product} | {sainsburys_product} | {score:.1f}\n")
-
+        file.write(
+            "Tesco product | Sainsbury's candidate | score | Tesco unit | Sainsbury's unit | cheaper\n"
+        )
+        for t, s, score in matches:
+            if t["unit_value"] == s["unit_value"]:
+                cheaper = "same"
+            elif t["unit_value"] < s["unit_value"]:
+                cheaper = "Tesco"
+            else:
+                cheaper = "Sainsburys"
+            file.write(
+                f"{t['product']} | {s['product']} | {score:.1f} | "
+                f"{t['unit_value']} | {s['unit_value']} | {cheaper}\n"
+            )
     return output
 
 
