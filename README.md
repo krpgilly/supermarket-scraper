@@ -56,21 +56,21 @@ A new price row is added only when its stored price, unit-price, or deal data di
 
 ### Product Matching – Current Status
 
-The current rule-based categorisation system is a temporary placeholder used to group products into broad categories.
+The latest scraped Tesco and Sainsbury's records can now be compared with the
+`compare.py` script. It:
 
-It is **not the intended final product-matching pipeline**.
+- Loads the newest stored row for each store and product.
+- Cleans product names by removing common supermarket and British qualifiers and product quantities.
+- Uses RapidFuzz `WRatio` matching to find the closest Sainsbury's name for each Tesco name.
+- Only compares names within the same normalized unit type.
+- Keeps matches with a similarity score of at least 62.
+- Writes ranked candidates and a Tesco/Sainsbury's "cheaper" result to `compared.txt`.
 
-The planned replacement is a fuzzy-matching system using RapidFuzz, which will:
+The output is a list of candidate matches, not a manually verified product mapping. Scores and unit values should be checked before relying on a match. Matching is also limited to names with comparable `unit_type` values, and the script compares normalized unit values rather than `raw_price` or deal prices.
 
-- Compare individual product names across Tesco and Sainsbury's.
-- Identify likely equivalent products despite differences in naming.
-- Rank potential matches using similarity scores.
-- Account for product variants, pack sizes and quantities to reduce incorrect matches.
-- Preserve the original product records and their associated pricing information.
+**Current pipeline:** Data extraction → Data cleaning → Fuzzy candidate matching → Price comparison → Text output.
 
-The eventual goal is to produce individual product comparisons, rather than category-level price averages.
-
-**Planned pipeline:** Data extraction → Data cleaning → Product matching → Match validation → Price comparison → JSON export → FastAPI.
+**Planned pipeline:** Match validation → JSON export → FastAPI/dashboard.
 
 ## Setup and Running
 
@@ -137,6 +137,16 @@ The database is created automatically in the project root as `products.db`. To i
 python -m database.db
 ```
 
+### Compare the latest stored prices
+
+After both stores have been scraped, run:
+
+```bash
+python compare.py
+```
+
+The script reads the latest price observation for each store/product pair from `products.db` and writes a candidate comparison report to `compared.txt`. The report includes the fuzzy-match score, normalized unit values and types, and which store is cheaper by normalized unit value.
+
 ## Project Structure
 
 ```text
@@ -159,7 +169,8 @@ root-level helper scripts:
   check_db.py                 # Quick database checks
   check_filter.py             # Quick filter validation
   check_filters.py            # Batch filter checks
-  compare.py                  # Manual comparison utilities
+  compare.py                  # RapidFuzz product matching and latest-price comparison
+  compared.txt                # Generated comparison candidates (created by compare.py)
   script.py                   # Helper/experimentation script
   groups.txt                  # Supporting grouping data
 
@@ -230,7 +241,8 @@ This is still a future step, but it fits the same project scope: the scraper gat
 
 - The category URLs and selectors are fixed in the scraper modules.
 - A scrape depends on Chrome being available, the sites being reachable, and their page markup remaining compatible with the selectors.
-- Product matching between supermarkets is not implemented.
+- Fuzzy product matches are candidates only; `compare.py` does not manually validate that names refer to the same product or account for every brand, size, and product-variant difference.
+- `compare.py` compares normalized unit values and ignores display price, deal price, and promotion text; it only compares Tesco and Sainsbury's rows whose unit types match.
 - Tesco promotional text is scraped but is not currently stored in the database.
 - Each run adds price history, but there is no query interface or scheduled scraper.
 
