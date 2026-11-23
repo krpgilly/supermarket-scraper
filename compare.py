@@ -52,9 +52,12 @@ def match_products():
         if pool.empty:
             continue
         match = process.extractOne(
-            t["clean"], pool["clean"].tolist(), scorer=fuzz.WRatio
+            t["clean"],
+            pool["clean"].tolist(),
+            scorer=fuzz.token_sort_ratio,
+            score_cutoff=75,
         )
-        if match and match[1] >= 62:
+        if match:
             s = pool.iloc[match[2]]
             matches.append((t, s, match[1]))
 
