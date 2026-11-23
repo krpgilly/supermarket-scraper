@@ -55,7 +55,7 @@ def match_products():
             t["clean"],
             pool["clean"].tolist(),
             scorer=fuzz.token_sort_ratio,
-            score_cutoff=75,
+            score_cutoff=70,
         )
         if match:
             s = pool.iloc[match[2]]
@@ -71,7 +71,7 @@ def write_matches(matches):
             "Closest product candidates (fuzzy matches; not manually verified)\n"
         )
         file.write(
-            "Tesco product | Sainsbury's candidate | score | Tesco unit | Sainsbury's unit | cheaper\n"
+            "Tesco product | Sainsbury's candidate | Tesco unit | Sainsbury's unit | cheaper | match quality score (/100)\n"
         )
         for t, s, score in matches:
             if t["unit_value"] == s["unit_value"]:
@@ -81,12 +81,14 @@ def write_matches(matches):
             else:
                 cheaper = "Sainsburys"
             file.write(
-                f"{t['product']} | {s['product']} | {score:.1f} | "
-                f"{t['unit_value']} | {s['unit_value']} | {cheaper}\n"
+                f"{t['product']} | {s['product']} | "
+                f"{t['unit_value']} | {s['unit_value']} | {cheaper} | "
+                f"{score:.1f}\n"
             )
     return output
 
 
-matches = match_products()
-output = write_matches(matches)
-print(f"Wrote {len(matches)} product candidates to {output}")
+if __name__ == "__main__":
+    matches = match_products()
+    output = write_matches(matches)
+    print(f"Wrote {len(matches)} product candidates to {output}")
