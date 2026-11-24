@@ -61,9 +61,9 @@ The latest scraped Tesco and Sainsbury's records can now be compared with the
 
 - Loads the newest stored row for each store and product.
 - Cleans product names by removing common supermarket and British qualifiers and product quantities.
-- Uses RapidFuzz `WRatio` matching to find the closest Sainsbury's name for each Tesco name.
+- Uses RapidFuzz `token_sort_ratio` matching to find the closest Sainsbury's name for each Tesco name.
 - Only compares names within the same normalized unit type.
-- Keeps matches with a similarity score of at least 62.
+- Keeps matches with a similarity score of at least 70.
 - Writes ranked candidates and a Tesco/Sainsbury's "cheaper" result to `compared.txt`.
 
 The output is a list of candidate matches, not a manually verified product mapping. Scores and unit values should be checked before relying on a match. Matching is also limited to names with comparable `unit_type` values, and the script compares normalized unit values rather than `raw_price` or deal prices.
