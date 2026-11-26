@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 from database.filters import is_dairy
 
+
 def init_db():
     conn = sqlite3.connect("products.db")
     cur = conn.cursor()
@@ -54,6 +55,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def get_or_create_store(cur, name):
     cur.execute("SELECT id FROM stores WHERE name = ?", (name,))
     row = cur.fetchone()
@@ -63,6 +65,7 @@ def get_or_create_store(cur, name):
 
     cur.execute("INSERT INTO stores (name) VALUES (?)", (name,))
     return cur.lastrowid
+
 
 def get_or_create_product(cur, name):
     cur.execute("SELECT id FROM products WHERE name = ?", (name,))
@@ -74,14 +77,15 @@ def get_or_create_product(cur, name):
     cur.execute("INSERT INTO products (name) VALUES (?)", (name,))
     return cur.lastrowid
 
+
 def insert_price(conn, store_name, price_data):
     cur = conn.cursor()
 
     store_id = get_or_create_store(cur, store_name)
     product_id = get_or_create_product(cur, price_data["name"])
 
-
-    cur.execute("""
+    cur.execute(
+        """
         SELECT 
             raw_price, raw_unit_price, unit_value, unit_type,
             deal_price, raw_deal_unit_price,
@@ -90,7 +94,8 @@ def insert_price(conn, store_name, price_data):
         WHERE store_id = ? AND product_id = ?
         ORDER BY id DESC
         LIMIT 1
-        """, (store_id, product_id),
+        """,
+        (store_id, product_id),
     )
     latest = cur.fetchone()
 
@@ -109,7 +114,7 @@ def insert_price(conn, store_name, price_data):
     if latest == new:
         conn.commit()
         return False
-    
+
     cur.execute(
         """
         INSERT INTO prices (
@@ -137,6 +142,7 @@ def insert_price(conn, store_name, price_data):
 
     conn.commit()
     return True
+
 
 if __name__ == "__main__":
     init_db()

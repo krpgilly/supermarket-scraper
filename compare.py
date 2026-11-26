@@ -38,6 +38,14 @@ def df_split(df):
     return tesco_products, sainsburys_products
 
 
+def pack_size(name):
+    n = name.lower()
+    m = re.search(r"\bx\s*(\d+)\b|\b(\d+)\s*(?:pack|x)\b", n)
+    if not m:
+        return None
+    return int(m.group(1) or m.group(2))
+
+
 def match_products():
     df = load_latest()
     df["clean"] = df["product"].apply(clean)
@@ -49,6 +57,9 @@ def match_products():
 
     for _, t in tesco.iterrows():
         pool = sains[sains["unit_type"] == t["unit_type"]]
+        if t["unit_type"] == "each":
+            size = pack_size(t["product"])
+            pool = pool[pool["product"].apply(pack_size) == size]
         if pool.empty:
             continue
         match = process.extractOne(
