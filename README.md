@@ -63,6 +63,7 @@ The latest scraped Tesco and Sainsbury's records can now be compared with the
 - Cleans product names by removing common supermarket and British qualifiers and product quantities.
 - Uses RapidFuzz `token_sort_ratio` matching to find the closest Sainsbury's name for each Tesco name.
 - Only compares names within the same normalized unit type.
+- Filters `each`-priced products by detected pack size, such as 6 or 12 eggs, before fuzzy matching.
 - Keeps matches with a similarity score of at least 70.
 - Writes ranked candidates and a Tesco/Sainsbury's "cheaper" result to `compared.txt`.
 
@@ -177,6 +178,7 @@ root-level helper scripts:
 tests/
   test_database.py            # Database insert behavior
   test_filters.py             # Dairy-product filter behavior
+  test_matching.py            # Egg pack-size matching behavior
   test_normalize.py           # Price and unit parsing behavior
   test_selector.py            # Checks example selector definitions
 
@@ -194,6 +196,7 @@ python -m pytest tests/ -v
 ```
 
 The database tests check that store, product, and price records are inserted. The normalization tests cover supported price and unit formats. The selector tests validate example selector strings; they do not verify the live selectors used by the category scrapers or test them against supermarket pages.
+The matching test checks that an eggs candidate is selected only when the Tesco and Sainsbury's pack sizes match.
 
 ## Troubleshooting
 
